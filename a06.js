@@ -140,7 +140,7 @@ function lowPass(luminanceArray) {
     // Get the luminance height. 
     const height = luminanceArray.height;
 
-    const lowPassArray = FloatArrayWrapper(width-20, height-20);
+    var lowPassArray = new FloatArrayWrapper(width-20, height-20);
 
     // Double for loop over the interior. Using a 21x21 filter.
     //
@@ -179,7 +179,7 @@ function highPass(lowPassArray, luminanceArray){
     const width = lowPassArray.width;
     const height = lowPassArray.height;
 
-    const highPassArray = (width, height);
+    var highPassArray = new FloatArrayWrapper(width, height);
 
     // Keep in mind that the highPass array is missing 10 rows on the top and bottom and 10 rows on the left and right.
 
@@ -198,8 +198,8 @@ function gammaCorrect(lowPassArray, highPassArray, gammaParam){
     // lowPassArray and highPassArray ARE the same dimensions.
     
     // Parameter used for gamma, gammaParam in [5,100]
-    max = lowPassArray.getIdx(0,0);
-    min = lowPassArray.getIdx(0,0);
+    let max = lowPassArray.getIdx(0,0);
+    let min = lowPassArray.getIdx(0,0);
     // Determine the max of the low pass array.
     // Determine the min of the low pass array.
     for(col = 0; col < width; col++){
@@ -210,16 +210,16 @@ function gammaCorrect(lowPassArray, highPassArray, gammaParam){
     }
 
     // Calculate gamma.
-    const gamma = Math.log(c)/(max-min); 
+    const gamma = Math.log(gammaParam)/(max-min); 
 
-    const newLuminanceArray = new FloatArrayWrapper(width, height);
+    var newLuminanceArray = new FloatArrayWrapper(width, height);
     // Gamma corrects the image to calculate the Log(L')
     // array.
 
     for(col = 0; col < width; col++){
         for(row = 0; row < height; row++){
-        logLuminance = gamma*lowPassArray.getIdx(row,col) + highPassArray.getIdx(row,col);
-        newLuminanceArray.setIdx(row,col, Math.exp(logLuminance));
+          let logLuminance = gamma*lowPassArray.getIdx(row,col) + highPassArray.getIdx(row,col);
+          newLuminanceArray.setIdx(row,col, Math.exp(logLuminance));
         }
     }
 
@@ -231,18 +231,18 @@ function finalizeImage(originalLuminanceArray, updatedLuminanceArray, image){
 
     // Calculate the new RGB in the image 
     // by multiplying the original image RGB by the scale. 
-    const width = updatedLuminaceArray.width;
-    const height = updatedLuminaceArray.height;
+    const width = updatedLuminanceArray.width;
+    const height = updatedLuminanceArray.height;
 
-    const newImage = [];
+    var newImage = new Uint8Wrapper(width,height);
 
     // Loop over the pixels of the SMALLER updatedLuminanceArray, shifting by 10 from the original dimensions.
     for(col = 0; col < width; col++){
         for(row = 0; row < height; row++){
-        scaleFactor = updatedLuminanceArray.getIdx(row,col)/originalLuminanceArray.getIdx(row+10,col+10); // Calculate the scale factor used.
+          let scaleFactor = updatedLuminanceArray.getIdx(row,col)/originalLuminanceArray.getIdx(row+10,col+10); // Calculate the scale factor used.
 
-        newImage.setIdx(row,col, image.getIdx(row+10,col+10)*scaleFactor);                                // Set the pixel in the new image 
-                                                                                                          // to be the old RGB times the scalefactor.
+          newImage.setIdx(row,col, image.getIdx(row+10,col+10)*scaleFactor);                                // Set the pixel in the new image 
+                                                                                                           // to be the old RGB times the scalefactor.
 
         }
     }
