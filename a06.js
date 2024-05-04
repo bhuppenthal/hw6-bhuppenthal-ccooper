@@ -200,7 +200,7 @@ function gammaCorrect(){
     }
 
     // Calculate gamma.
-    const gamma = Math.log(c)/(max-min); 
+    const gamma = Math.log(gammaParam)/(max-min); 
 
     luminancePrimeArray = new LuminanceWrapper(width, height);
 
