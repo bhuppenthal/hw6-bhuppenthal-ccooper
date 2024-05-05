@@ -18,7 +18,6 @@ var c_elem = document.getElementById('contrastID');
 var c = c_elem.value;
 c_elem.addEventListener('change', function (e) {
     c = parseFloat(c_elem.value);
-    console.log(`c: ${c}`);
     // Because the lowPass and highPass filters only need to be calculated once,
     // skip when the contrast threshold changes.
     renderBilateralFilters();
@@ -148,21 +147,22 @@ function calculateLowPass() {
         for(row = 10; row<height-10; row++){
             
             let pixelLowPass = 0.0;
+            let scaleFactor = 0.0;
 
             for(leftShift = -10; leftShift <= 10; leftShift++){
                 for(upShift = -10; upShift <= 10; upShift++){
                     let logLuminance = Math.log(luminanceArray.getIdx(row,col));
                     // Calculate the contribution of the gaussian in space. 
-                    // spatialContribution = spatialGaussian(col,row,col+upShift,row+leftShift);
-                    let spatialContribution = 1;
+                    let spatialContribution = spatialGaussian(col,row,col+upShift,row+leftShift);
                     // Calculate the contribution of the gaussian w.r.t intensity. 
                     let intensityContribution = intensityGaussian(luminanceArray.getIdx(row,col), luminanceArray.getIdx(row+leftShift,col+upShift));
 
                     // Add to low pass value for this pixel.
                     pixelLowPass += spatialContribution * intensityContribution * logLuminance;
+                    scaleFactor += spatialContribution * intensityContribution;
                 }
             }
-            lowPassArray.setIdx(row-10, col-10, pixelLowPass);
+            lowPassArray.setIdx(row-10, col-10, pixelLowPass/scaleFactor);
         }
     }
     console.log('finished low pass!');
@@ -240,4 +240,5 @@ function finalizeImage(){
     canvasC.height = height;
     let bilateralFilterImage = new ImageData(rgb_values.array, width, height);
     ctxC.putImageData(bilateralFilterImage, 0, 0);
+    console.log('finished render');
 }
